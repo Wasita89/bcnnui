@@ -1330,49 +1330,83 @@ body {
   color: #ffffff;
 }
 
-.chart-bars {
-  display: flex;
-  align-items: flex-end;
-  gap: 8px;
-  height: 160px;
-}
-
-.chart-bar {
-  width: 12px;
-  height: var(--bar);
-  border-radius: 8px 8px 4px 4px;
-  background: linear-gradient(180deg, #31d0a1 0%, #0f7b7a 100%);
-}
-
-.chart-legend {
+.review-chart {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 10px;
-  margin-top: 12px;
-}
-
-.legend-item {
-  display: flex;
+  grid-template-columns: 180px 1fr;
+  gap: 16px;
   align-items: center;
-  gap: 8px;
-  font-size: 12px;
-  color: #4d5b75;
+}
+
+.review-chart-total {
   background: #f7f9ff;
-  border-radius: 999px;
-  padding: 6px 10px;
   border: 1px solid #e6ebf3;
+  border-radius: 18px;
+  padding: 16px;
+  text-align: center;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.6);
 }
 
-.legend-item strong {
-  margin-left: auto;
+.review-total-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1f4a8a;
+}
+
+.review-total-label {
+  font-size: 12px;
+  color: #6b7a96;
+  margin-top: 4px;
+}
+
+.review-chart-list {
+  display: grid;
+  gap: 12px;
+}
+
+.review-chart-row {
+  display: grid;
+  grid-template-columns: 140px 1fr auto;
+  gap: 12px;
+  align-items: center;
+}
+
+.review-chart-label {
+  font-size: 13px;
   color: #1c2a44;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.legend-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #31d0a1;
+.review-chart-bar {
+  height: 10px;
+  background: #eef2f8;
+  border-radius: 999px;
+  overflow: hidden;
+  position: relative;
+}
+
+.review-chart-bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #31d0a1 0%, #0f7b7a 100%);
+}
+
+.review-chart-count {
+  font-size: 12px;
+  color: #6b7a96;
+  white-space: nowrap;
+}
+
+.review-chart-empty {
+  font-size: 13px;
+  color: #6b7a96;
+  background: #f7f9ff;
+  border: 1px dashed #d7e1f0;
+  padding: 12px;
+  border-radius: 12px;
 }
 
 .metric-panel {
@@ -3177,6 +3211,19 @@ body {
   }
 
   .admin-room-status {
+    justify-self: start;
+  }
+
+  .review-chart {
+    grid-template-columns: 1fr;
+  }
+
+  .review-chart-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .review-chart-count {
     justify-self: start;
   }
 
