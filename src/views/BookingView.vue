@@ -20,6 +20,15 @@
         </div>
 
         <div v-else class="booking-flow">
+          <div class="booking-survey-banner">
+            <div>
+              <div class="booking-survey-title">แบบสำรวจความต้องการเข้าพักหอใน</div>
+              <div class="booking-survey-sub">
+                สำหรับนักศึกษาวิทยาลัยพยาบาลนครพนม ใช้เพื่อวางแผนจัดสรรหอพักล่วงหน้า
+              </div>
+            </div>
+            <v-btn color="primary" variant="flat" @click="surveyDialog = true">เปิดแบบสำรวจ</v-btn>
+          </div>
           <div v-if="isAdmin" class="booking-admin">
             เข้าสู่ระบบในฐานะผู้ดูแลระบบ • ใช้เพื่อดูภาพรวมและทดสอบระบบจอง
           </div>
@@ -208,6 +217,7 @@
       </v-card-actions>
     </v-card>
   </v-dialog>
+
 </template>
 
 <script setup>
@@ -219,6 +229,7 @@ const {
   isAdmin,
   isNewStudent,
   canNewSelect,
+  surveyDialog,
   bookingRole,
   oldMoveDecision,
   oldConfirmed,

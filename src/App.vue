@@ -4,17 +4,15 @@
       <AppHeader />
 
       <v-main>
-        <HomeView v-if="currentView === 'home'" />
-        <RoomsView v-else-if="currentView === 'rooms'" />
-        <RoomDetailView v-else-if="currentView === 'details'" />
-        <BookingView v-else-if="currentView === 'booking'" />
-        <ReviewsView v-else-if="currentView === 'reviews'" />
-        <LoginView v-else-if="currentView === 'login'" />
-        <AdminView v-else-if="currentView === 'admin'" />
+        <router-view />
       </v-main>
 
       <AppFooter />
     </div>
+
+    <v-dialog v-model="showRoomDetailDialog" max-width="980" scrollable>
+      <RoomDetailView />
+    </v-dialog>
 
     <v-dialog v-model="showReplyDialog" max-width="520">
       <v-card>
@@ -71,31 +69,39 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+
+    <SurveyDialog />
+    <MoveDialog />
   </v-app>
 </template>
 
 <script setup>
 import { computed, provide, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { useStore } from "vuex";
 import AppHeader from "./components/layout/AppHeader.vue";
 import AppFooter from "./components/layout/AppFooter.vue";
-import HomeView from "./views/HomeView.vue";
-import RoomsView from "./views/RoomsView.vue";
 import RoomDetailView from "./views/RoomDetailView.vue";
-import BookingView from "./views/BookingView.vue";
-import ReviewsView from "./views/ReviewsView.vue";
-import LoginView from "./views/LoginView.vue";
-import AdminView from "./views/AdminView.vue";
+import SurveyDialog from "./components/forms/SurveyDialog.vue";
+import MoveDialog from "./components/forms/MoveDialog.vue";
 
 const store = useStore();
-
-const currentView = ref("home");
+const router = useRouter();
+const route = useRoute();
+const viewMap = {
+  home: "home",
+  rooms: "rooms",
+  booking: "booking",
+  reviews: "reviews",
+  login: "login",
+  admin: "admin"
+};
+const currentView = computed(() => route.name || "home");
 
 const stats = computed(() => store.state.stats);
 const rooms = computed(() => store.state.rooms);
 const roomsAll = computed(() => store.state.roomsAll);
 const reviews = computed(() => store.state.reviews);
-const highlights = computed(() => store.state.highlights);
 const contacts = computed(() => store.state.contacts);
 const dormAmenities = computed(() => store.state.dormAmenities);
 const dormRules = computed(() => store.state.dormRules);
@@ -153,8 +159,6 @@ const reviewForm = ref({
 });
 const localReviews = ref([]);
 
-const search = ref("");
-const selectedType = ref("ทุกประเภทห้อง");
 const roomsSearch = ref("");
 const roomsSort = ref("แนะนำ");
 const activeRoomTab = ref("ทุกอาคาร");
@@ -177,6 +181,14 @@ const loginForm = ref({
 });
 const showReplyDialog = ref(false);
 const showCalendarDialog = ref(false);
+const showRoomDetailDialog = ref(false);
+const surveyDialog = ref(false);
+const moveDialog = ref(false);
+const surveyForm = ref({
+  studentId: "",
+  name: "",
+  intent: "move"
+});
 const calendarSort = ref("เรียงวันที่ใกล้สุด");
 const showBookingConfirm = ref(false);
 const bookingConfirmDetail = ref({
@@ -192,7 +204,6 @@ const calendarForm = ref({
   status: "กิจกรรมทั่วไป"
 });
 
-const roomTypes = ["ทุกประเภทห้อง", "ห้องเดี่ยว", "ห้องคู่", "ห้องพรีเมียม", "ห้องมาตรฐาน"];
 const roomSortOptions = ["แนะนำ", "ราคาต่ำสุด", "ราคาสูงสุด"];
 const roomTabs = ["ทุกอาคาร", "หอพักหญิง 1", "หอพักหญิง 2", "หอพักหญิง 3", "หอพักชาย 1"];
 const calendarTagOptions = [
@@ -313,6 +324,115 @@ const availabilityOptions = [
     colorClass: "green"
   }
 ];
+
+const createDormFloors = (prefix, floorsCount, roomsPerFloor) => {
+  const floors = {};
+  for (let floor = 1; floor <= floorsCount; floor += 1) {
+    const rooms = [];
+    for (let index = 1; index <= roomsPerFloor; index += 1) {
+      const roomNo = `${floor}${String(index).padStart(2, "0")}`;
+      const beds = 2 + (index % 3); // 2-4 เตียง
+      rooms.push({
+        id: `${prefix}-${roomNo}`,
+        name: `ห้อง ${roomNo}`,
+        beds
+      });
+    }
+    floors[`ชั้น ${floor}`] = rooms;
+  }
+  return floors;
+};
+
+const dormOptions = [
+  {
+    name: "หอพักหญิง 1",
+    meta: "โซนใน • สำหรับนักศึกษาหญิง",
+    imageClass: "bg-room-1",
+    floors: createDormFloors("d1", 6, 18)
+  },
+  {
+    name: "หอพักหญิง 2",
+    meta: "โซนกลาง • บรรยากาศสงบ",
+    imageClass: "bg-room-2",
+    floors: createDormFloors("d2", 6, 18)
+  },
+  {
+    name: "หอพักหญิง 3",
+    meta: "โซนเงียบ • เหมาะกับการอ่านหนังสือ",
+    imageClass: "bg-room-4",
+    floors: createDormFloors("d3", 5, 20)
+  },
+  {
+    name: "หอพักหญิง 4",
+    meta: "โซนหน้า • ใกล้อาคารเรียน",
+    imageClass: "bg-room-5",
+    floors: createDormFloors("d4", 5, 18)
+  },
+  {
+    name: "หอพักชาย 1",
+    meta: "โซนกีฬา • สำหรับนักศึกษาชาย",
+    imageClass: "bg-room-3",
+    floors: createDormFloors("m1", 6, 18)
+  }
+];
+
+const selectedDorm = ref("");
+const selectedFloor = ref("");
+const surveySelectedRoom = ref("");
+
+const floorOptions = computed(() => {
+  const dorm = dormOptions.find((item) => item.name === selectedDorm.value);
+  return dorm ? Object.keys(dorm.floors).sort((a, b) => {
+    const na = Number(a.replace(/\D/g, "")) || 0;
+    const nb = Number(b.replace(/\D/g, "")) || 0;
+    return na - nb;
+  }) : [];
+});
+
+const roomOptions = computed(() => {
+  const dorm = dormOptions.find((item) => item.name === selectedDorm.value);
+  if (!dorm) return [];
+  const rooms = dorm.floors[selectedFloor.value] || [];
+  return rooms
+    .map((room, index) => {
+      const statusType = index % 11 === 0 ? "maintenance" : index % 7 === 0 ? "full" : index % 4 === 0 ? "partial" : "available";
+      const occupied = statusType === "partial" ? Math.max(1, Math.floor(room.beds / 2)) : statusType === "full" ? room.beds : 0;
+      const statusLabel =
+        statusType === "available"
+          ? "ว่าง"
+          : statusType === "partial"
+          ? "มีพัก"
+          : statusType === "full"
+          ? "เต็ม"
+          : "ซ่อม";
+      return {
+        id: room.id,
+        label: `${room.name} • ${room.beds} เตียง`,
+        ...room,
+        dorm: dorm.name,
+        floor: selectedFloor.value,
+        code: room.name.replace("ห้อง ", ""),
+        capacityLabel: `${occupied}/${room.beds}`,
+        occupancyLabel: `${occupied}/${room.beds}`,
+        statusType,
+        statusLabel
+      };
+    })
+    .sort((a, b) => a.code.localeCompare(b.code));
+});
+
+const surveySelectedRoomDetail = computed(() =>
+  roomOptions.value.find((room) => room.id === surveySelectedRoom.value)
+);
+
+watch(selectedDorm, () => {
+  selectedFloor.value = "";
+  surveySelectedRoom.value = "";
+});
+
+watch(selectedFloor, () => {
+  surveySelectedRoom.value = "";
+});
 
 const newAvailableRooms = computed(() =>
   roomsAll.value.filter((room) => room.status !== "เต็ม")
@@ -464,6 +584,45 @@ const amenityIcons = {
   "ตู้เสื้อผ้า": "mdi-hanger"
 };
 
+const parsePrice = (value) => {
+  const numeric = Number(String(value || "").replace(/[^\d]/g, ""));
+  return Number.isNaN(numeric) ? 0 : numeric;
+};
+
+const filteredRooms = computed(() => {
+  let list = [...roomsAll.value];
+  if (activeRoomTab.value && activeRoomTab.value !== "ทุกอาคาร") {
+    list = list.filter((room) => room.building === activeRoomTab.value);
+  }
+  const term = roomsSearch.value?.trim().toLowerCase();
+  if (term) {
+    list = list.filter((room) => {
+      const haystack = [
+        room.name,
+        room.building,
+        room.tag,
+        room.size,
+        room.price,
+        room.status,
+        ...(room.amenities || [])
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+      return haystack.includes(term);
+    });
+  }
+  if (roomsSort.value === "ราคาต่ำสุด") {
+    list.sort((a, b) => parsePrice(a.price) - parsePrice(b.price));
+  }
+  if (roomsSort.value === "ราคาสูงสุด") {
+    list.sort((a, b) => parsePrice(b.price) - parsePrice(a.price));
+  }
+  return list;
+});
+
+const filteredRoomCount = computed(() => filteredRooms.value.length);
+
 const resetBookingState = () => {
   bookingRole.value = "old";
   oldMoveDecision.value = "";
@@ -539,7 +698,10 @@ const handleLogout = () => {
 };
 
 const setView = (view) => {
-  currentView.value = view;
+  const target = viewMap[view] || "home";
+  if (route.name !== target) {
+    router.push({ name: target });
+  }
   if (typeof window !== "undefined") {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -552,7 +714,11 @@ const selectedRoom = computed(() => {
 
 const openRoomDetails = (room) => {
   selectedRoomId.value = room.id;
-  setView("details");
+  showRoomDetailDialog.value = true;
+};
+
+const closeRoomDetails = () => {
+  showRoomDetailDialog.value = false;
 };
 
 const selectedAvailability = computed(() =>
@@ -724,6 +890,18 @@ const confirmAvailability = () => {
   oldConfirmed.value = true;
 };
 
+const submitSurvey = () => {
+  if (!surveyForm.value.studentId || !surveyForm.value.name) return;
+  surveyDialog.value = false;
+  if (surveyForm.value.intent === "move") {
+    moveDialog.value = true;
+  }
+};
+
+const confirmMoveSelection = () => {
+  moveDialog.value = false;
+};
+
 const appState = {
   currentView,
   setView,
@@ -735,6 +913,13 @@ const appState = {
   stats,
   rooms,
   roomsAll,
+  roomsSearch,
+  roomsSort,
+  roomSortOptions,
+  roomTabs,
+  activeRoomTab,
+  filteredRooms,
+  filteredRoomCount,
   reviews,
   contacts,
   mapUrl,
@@ -747,6 +932,20 @@ const appState = {
   amenityIcons,
   openRoomDetails,
   selectedRoom,
+  showRoomDetailDialog,
+  closeRoomDetails,
+  surveyDialog,
+  moveDialog,
+  surveyForm,
+  submitSurvey,
+  selectedDorm,
+  selectedFloor,
+  dormOptions,
+  floorOptions,
+  roomOptions,
+  confirmMoveSelection,
+  surveySelectedRoom,
+  surveySelectedRoomDetail,
   dormAmenities,
   dormRules,
   isNewStudent,
@@ -819,5 +1018,3 @@ const appState = {
 provide("appState", appState);
 
 </script>
-
-

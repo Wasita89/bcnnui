@@ -60,6 +60,31 @@
 
   <section>
     <v-container class="rooms-container">
+      <div class="survey-cta">
+        <div class="survey-cta-left">
+          <div class="survey-cta-badge">
+            <v-icon size="16">mdi-check-circle</v-icon>
+            เปิดการจอง 2/2569
+          </div>
+          <h3 class="survey-cta-title">แบบสอบถามความต้องการเข้าหอพัก</h3>
+          <p class="survey-cta-sub">
+            เพื่อการจัดสรรห้องพักที่ตรงใจมากที่สุด ขอความร่วมมือนักศึกษาทุกคนทำแบบสอบถามก่อนเปิดระบบหอพัก
+          </p>
+          <div class="survey-cta-actions">
+            <v-btn color="secondary" variant="flat" class="survey-cta-primary" @click="surveyDialog = true">
+              <v-icon start size="18">mdi-pencil</v-icon>
+              เริ่มทำแบบสอบถามทันที
+            </v-btn>
+            <v-btn color="white" variant="outlined" class="survey-cta-secondary">
+              <v-icon start size="18">mdi-clipboard-check-outline</v-icon>
+              ตรวจสอบสถานะ
+            </v-btn>
+          </div>
+        </div>
+        <div class="survey-cta-right">
+          <div class="survey-cta-image"></div>
+        </div>
+      </div>
       <div class="section-head">
         <div>
           <v-chip class="hero-tag" variant="flat">ห้องแนะนำ</v-chip>
@@ -358,6 +383,7 @@ const {
   sortedBookingCalendar,
   amenityIcons,
   setView,
+  surveyDialog,
   openRoomDetails
 } = appState;
 </script>

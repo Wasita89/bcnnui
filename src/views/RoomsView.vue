@@ -38,10 +38,13 @@
         </button>
       </div>
 
-      <div class="rooms-count">แสดง {{ roomsAll.length }} ห้องพัก</div>
+      <div class="rooms-count">
+        แสดง {{ filteredRoomCount }} ห้องพัก
+        <span v-if="filteredRoomCount !== roomsAll.length">จากทั้งหมด {{ roomsAll.length }} ห้อง</span>
+      </div>
 
       <v-row class="mt-4" dense>
-        <v-col cols="12" md="4" v-for="room in roomsAll" :key="room.id">
+        <v-col cols="12" md="4" v-for="room in filteredRooms" :key="room.id">
           <v-card class="room-card rooms-page-card">
             <div class="room-image" :class="room.imageClass">
               <v-chip class="room-tag" color="primary" variant="tonal">{{ room.tag }}</v-chip>
@@ -86,6 +89,16 @@
 import { inject } from "vue";
 
 const appState = inject("appState");
-const { roomsAll, roomsSearch, roomsSort, roomSortOptions, roomTabs, activeRoomTab, amenityIcons, openRoomDetails } =
-  appState;
+const {
+  roomsAll,
+  filteredRooms,
+  filteredRoomCount,
+  roomsSearch,
+  roomsSort,
+  roomSortOptions,
+  roomTabs,
+  activeRoomTab,
+  amenityIcons,
+  openRoomDetails
+} = appState;
 </script>
